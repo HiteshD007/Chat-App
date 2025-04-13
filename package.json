@@ -5,7 +5,7 @@
   "scripts": {
     "server": "ts-node server.ts",
     "build": "cd frontend && npm install && npm run build && tsc",
-    "start": "node dist/server.js" 
+    "start": "node dist/server.ts" 
   },
   "keywords": [],
   "author": "",
