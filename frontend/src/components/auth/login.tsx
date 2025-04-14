@@ -19,22 +19,22 @@ import {
  } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import Loader from '../loader';
 import { toast } from 'sonner';
-import { useLoadingStore, useAuthStore } from '@/store/zustand.store';
-import { useNavigate, useLocation } from 'react-router-dom';
+
+import { useAuthStore } from '@/store/zustand.store';
 import { socket } from '@/lib/socket';
 import useFetch from '@/hooks/use-fetch';
+import { useState } from 'react';
 
 
 const Login = () => {
 
-  const navigate = useNavigate();
-  const location = useLocation();
   const { request } = useFetch();
 
 
   const { setAccessToken } = useAuthStore();
-  const { setIsLoading } = useLoadingStore();
+  const [isLoading , setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -46,29 +46,35 @@ const Login = () => {
 
   const onSubmit = async (values:z.infer<typeof loginFormSchema>) => {
     setIsLoading(true);
-    const data = await request({
-      url: "/api/auth/log-in",
-      method: "POST",
-      data: {identifier: values.auth, password: values.password}
-    });
-    if(data.error) {
-      toast.error(data.message,{
-        duration: 1000
+    try {
+      const data = await request({
+        url: "/api/auth/log-in",
+        method: "POST",
+        data: {identifier: values.auth, password: values.password}
       });
-      return;
-    };
-    setAccessToken(data.accessToken);
-
-    socket.auth = { token : data.accessToken};
-    socket.connect(); 
-
-    form.reset({
-      auth: "",
-      password:""
-    });
-    setIsLoading(false);
-    const redirectTo = location.state?.from || "/";
-    navigate(redirectTo);
+      console.log(data);
+      
+      if(data?.error) {
+        toast.error(data?.message,{
+          duration: 1000
+        });
+      }else if(data?.success){
+        setAccessToken(data.accessToken);
+        socket.auth = { token : data.accessToken};
+        socket.connect(); 
+        form.reset({
+          auth: "",
+          password:""
+        });
+      }else{
+        throw new Error('Unexpected Event occurring');
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("something went wrong!!");
+    }finally{
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -112,8 +118,8 @@ const Login = () => {
               </FormItem>
             )}
             />
-            <Button className='w-full' variant="blue">
-              Login
+            <Button disabled={isLoading} className="w-full [&_svg:not([class*='size-'])]:size-6" variant="blue">
+              {isLoading ? <Loader hideText/> : "Login"}
             </Button>
           </form>
         </Form>

@@ -2,7 +2,6 @@ import User from "../schema/user.schema";
 import { generateAccessToken, generateRefreshToken } from "../configs/tokenAndCookie";
 import { verifyToken } from "../configs/verifyToken";
 import { AuthenticatedRequest } from "../configs/types";
-import { getUserById } from "../utils/general-function";
 
 
 export const signUp = async (req:any,res:any) => {

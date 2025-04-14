@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
+    "local-server":"nodemon server.ts",
     "server": "ts-node server.ts",
     "build": "cd frontend && npm install && npm run build && tsc",
     "build-backend": "tsc",

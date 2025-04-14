@@ -1,7 +1,6 @@
 import './App.css';
 import "@cyntler/react-doc-viewer/dist/index.css";
 import Layout from './components/layout/layout'
-import { Toaster } from './components/ui/sonner'
 import { useAuthStore } from '@/store/zustand.store';
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -24,8 +23,7 @@ function App() {
 
   return (
     <>
-    <Toaster position='top-right'/>
-    <Layout />
+      <Layout />
     </>
   )
 }
