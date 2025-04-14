@@ -52,6 +52,14 @@ const MobileInnerSidebar = ({openSheet}:{openSheet: () => void}) => {
   const members = selectedServer?.members || [];
 
   const onChannelSelect = (channel:channelInterface) => {
+
+    if(channel.type === "voice") {
+      toast.error('Voice channel service not available yet!!',{
+        duration: 1000,
+      });
+      return;
+    }
+
     const isUserPermitted = user?._id === selectedServer?.owner || channel.permittedUsers.find((u) => u._id === user?._id)
     if(channel.isPrivate && !isUserPermitted) {
       toast('only permitted users can view this channel');

@@ -49,8 +49,11 @@ const Layout = () => {
 
 
       <div className="relative flex md:hidden flex-row justify-start items-start">
-        <OuterSidebar isMobile={true} openSheet={openSheet}/>
-        <MobileInnerSidebar openSheet={openSheet}/>
+        <div className="flex relative w-full">
+          <OuterSidebar isMobile={true} openSheet={openSheet}/>
+          <MobileInnerSidebar openSheet={openSheet}/>
+          <UserCard />
+        </div>
         <Sheet open={sheetOpen} onOpenChange={(open) => setSheetOpen(open)}>
           <VisuallyHidden>
             <SheetHeader>
