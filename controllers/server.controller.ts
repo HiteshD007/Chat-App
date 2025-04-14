@@ -60,33 +60,30 @@ export const createServerSocket = async(data: {serverName:string, displayImg:str
 //   { $addToSet: { members: "user3" } }, // Adds user3 without removing user1 & user2
 // );
 
-export const deleteServer = async (req: AuthenticatedRequest, res:any) => {
+// Delete Server
+export const deleteServer = async (data:{serverId: string, userId: string}) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const userId = req.userId;
-    const { serverId } = req.body;
+    const { serverId, userId } = data;
 
     const server = await Server.findOneAndDelete({_id: serverId, owner: userId},{session});
     if(!server) {
       await session.abortTransaction();
-      return res.status(401).json({error:true,message: "UnAuthorized Action!!"});
+      return 401 // unauthorized Action;
     }
-
     await session.commitTransaction();
-    return res.status(200).json({
-      success:true,message:`${server.name} Deleted Permanently!!`,
-    });
+    return {serverName: server.name} // success
   } catch (error:any) {
     await session.abortTransaction();
     console.log("Error in [DELETE SERVER]",error.message);
-    return res.status(500).json({message: "Internal Server Error"});
+    return 500 // unexpected error
   }finally{
     session.endSession();
   }
 };
 
-
+// Join Server
 export const joinServer = async (data:{userId:string, serverId: string}) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -119,13 +116,13 @@ export const joinServer = async (data:{userId:string, serverId: string}) => {
   }
 }
 
-
-export const leaveServer = async (req:AuthenticatedRequest, res:any) => {
+//MARK: Leave Server
+export const leaveServer = async (data:{serverId: string, userId: string}) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const userId = req.userId;
-    const { serverId } = req.body;
+
+    const {serverId, userId} = data;
 
     const updatedServer = await Server.findByIdAndUpdate(serverId,{
       $pull: {members: userId}
@@ -137,30 +134,24 @@ export const leaveServer = async (req:AuthenticatedRequest, res:any) => {
 
     if(!updatedServer || !updatedUser) {
       await session.abortTransaction();
-      return res.status(400).json({error:true,message:"can't leave server"});
+      return 400; // cant leave server;
     }
 
-    const data = await getUserById(userId);
     await session.commitTransaction();
 
-    return res.status(200).json({
-      success:true,
-      user:data?.user,
-      servers:data?.servers,
-      friends:data?.friends
-    });
+    return {serverName: updatedServer.name}; // success
   
   } catch (error:any) {
     await session.abortTransaction();
     console.log('Error in [LEAVE SERVER]',error.message);
-    return res.status(500).json({message:"Internal Server Error"});
+    return 500;
   }finally{
     await session.endSession();
   }
 }
 
 
-
+// MARK: ADD Channel
 export const addChannel = async (data:{
   serverId: string,
   channelName: string,

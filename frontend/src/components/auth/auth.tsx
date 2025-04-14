@@ -15,7 +15,7 @@ const Auth = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const {isAuthenticated} = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     if(isAuthenticated){

@@ -52,7 +52,6 @@ const Login = () => {
         method: "POST",
         data: {identifier: values.auth, password: values.password}
       });
-      console.log(data);
       
       if(data?.error) {
         toast.error(data?.message,{

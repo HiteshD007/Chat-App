@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { toast } from 'sonner';
 import { Button } from "../ui/button";
 import { ChevronDown, Plus, UserPlus } from "lucide-react";
 import { 
@@ -10,13 +9,12 @@ import {
   DropdownMenuItem,
  } from "../ui/dropdown-menu";
 
-
-import useFetch from '@/hooks/use-fetch';
 import { useAuthStore, useServerStore } from '@/store/zustand.store';
 
 import AddChannelDialog from "../dialogs/add-channel-dialog";
 import ServerSettingsDialog from "../dialogs/server-settings-dialog";
 import ServerInviteDialog from "../dialogs/server-invite-dialog";
+import { socket } from "@/lib/socket";
 
 const ServerDropdown = () => {
 
@@ -47,28 +45,17 @@ const ServerDropdown = () => {
   
 
   const { user } = useAuthStore();
-  const { removeServer, selectedServer, setSelectedServer } = useServerStore();
+  const { selectedServer } = useServerStore();
   
-
-  const { request } = useFetch();
   const onDeleteServer = async () => {
-    const data = await request({
-      url: "/api/data/delete/server",
-      method: "DELETE",
-      data: {serverId: selectedServer?._id}
-    });
-    if(!data) {
-      toast.error('Unable to delete Server',{
-        duration: 1000
-      });
-      return;
-    }
-    toast.success(`Server: ${selectedServer?.name} deleted!!`,{
-      duration: 1000,
-    });
-    removeServer(selectedServer?._id as string);
-    setSelectedServer(null);
+    console.log(selectedServer);
+    socket.emit('delete_server',{serverId: selectedServer?._id});
   };
+
+  const onLeaveServer = async () => {
+    socket.emit('leave_server',{serverId: selectedServer?._id});
+  }
+
 
   const dropdownOptions = [
     {
@@ -111,7 +98,7 @@ const ServerDropdown = () => {
                   Delete Server
                 </DropdownMenuItem>
             ): (
-              <DropdownMenuItem  variant='destructive' className="h-10">
+              <DropdownMenuItem onClick={onLeaveServer}  variant='destructive' className="h-10">
                 Leaver Server
               </DropdownMenuItem>
             )}

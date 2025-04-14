@@ -2,7 +2,6 @@ import { useEffect, createContext, useContext } from "react";
 import useFetch from "@/hooks/use-fetch";
 import { socket } from "@/lib/socket";
 import Loader from "@/components/loader";
-
 import { useAuthStore, useLoadingStore  } from "@/store/zustand.store";
 
 const authContext = createContext(null);
@@ -29,25 +28,6 @@ export const AuthProvider = ({
     }
   }
   
-//  const refreshAccessToken = async () => { 
-//     try {
-//       const req = await fetch('/api/auth/refresh-access-token',{
-//         credentials: "include"
-//       });
-//       if(!req.ok) setIsLoading(false);
-//       const data = await req.json();
-//       if(data.logoutUser) {
-//         return null;
-//       }else{
-//         setAccessToken(data.accessToken);
-//         return data.accessToken;
-//       }
-//     } catch (error) {
-//       console.log('Internal Server Error');
-//     }
-//   };
-
-
   const autoSignIn = async () => {
     const token = await getAccessToken();
     if(token === null) {
@@ -74,8 +54,6 @@ export const AuthProvider = ({
       socket.disconnect();
     })
   },[]);
-
-
 
 
   return (

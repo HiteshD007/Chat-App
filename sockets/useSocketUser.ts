@@ -2,7 +2,7 @@ import { Socket, Server as SocketIoServer } from 'socket.io';
 import SocketIOFile from 'socket.io-file';
 import { verifyToken } from '../configs/verifyToken';
 import { getUserById, getUserRequestByReceiver } from '../utils/general-function';
-import { addChannel, createServerSocket, joinServer } from '../controllers/server.controller';
+import { addChannel, createServerSocket, deleteServer, joinServer, leaveServer } from '../controllers/server.controller';
 import { getMessagesOfRoom, storeMediaMessageToDb, storeTextMessageToDb, uploadMediaToCloudinary } from '../controllers/message.controller';
 import User from '../schema/user.schema';
 import Request from '../schema/request.schema';
@@ -64,6 +64,7 @@ const userIdFromToken = (socket:Socket) => {
 
 export const registerUserEvents = (socket: Socket, io: SocketIoServer, uploader: SocketIOFile) => {
   
+  //MARK: servers
   socket.on('create_server', async(data) => {
     const userId = userIdFromToken(socket);
     const server = await createServerSocket(data,userId);
@@ -73,6 +74,30 @@ export const registerUserEvents = (socket: Socket, io: SocketIoServer, uploader:
     }
     socket.emit('server_created', {server});
   });
+
+  socket.on('delete_server',async({serverId}) => {
+    const userId = userIdFromToken(socket);
+    const server = await deleteServer({serverId, userId});
+
+    if(server === 401){
+      socket.emit('server_delete_error',{message: "you doesn't have permission to do this"});
+    }else if(server === 500){
+      socket.emit('server_delete_error', {message: "unable to delete server"});
+    }else{
+      socket.emit('server_deleted',{serverName: server.serverName, serverId});
+    }
+  });
+
+  socket.on('leave_server',async({serverId}) => {
+    const userId = userIdFromToken(socket);
+    const server = await leaveServer({serverId, userId});
+
+    if(server === 400 || server === 500){
+      socket.emit('server_leave_error', {message: "unable to leave server"});
+    }else{
+      socket.emit('server_leaved',{serverName:server.serverName, serverId});
+    }
+  })
 
 
   socket.on('create_invite_link_server', async({serverId, expiresIn}) => {
@@ -113,7 +138,7 @@ export const registerUserEvents = (socket: Socket, io: SocketIoServer, uploader:
 
   });
 
-
+  //MARK: channel
   socket.on('create_channel', async(data) => {
     userIdFromToken(socket);
     const channel = await addChannel(data);
@@ -176,7 +201,7 @@ export const registerUserEvents = (socket: Socket, io: SocketIoServer, uploader:
   });
 
 
-  //MARK: SEND MESSAGE
+  //MARK: MESSAGE
   socket.on('send_message',async(data) => {
     const message = await storeTextMessageToDb(data);
     if(!message) {
@@ -299,6 +324,7 @@ export const registerUserEvents = (socket: Socket, io: SocketIoServer, uploader:
   //MARK: LOGOUT
   socket.on('logout',() => {
     socket.emit('logged_out');
+    socket.disconnect();
   });
 };
 

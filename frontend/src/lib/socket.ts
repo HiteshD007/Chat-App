@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 import SocketIoFileClient from 'socket.io-file-client';
 
-import { useAuthStore, useFriendStore, useLoadingStore, useServerStore, useMessageStore, useRequestStore, useOnlineUserStore } from '@/store/zustand.store';
+import { useAuthStore, useFriendStore, useLoadingStore, useServerStore, useMessageStore, useRequestStore, useOnlineUserStore, useChatStore } from '@/store/zustand.store';
 import { toast } from 'sonner';
 
 
@@ -33,24 +33,27 @@ export const uploadFiles = (files:File[],data?: any) => {
 
 const { setUser, setIsAuthenticated, setRoomId } = useAuthStore.getState();
 const {setFriends, addFriend, removeFriend } = useFriendStore.getState();
-const {setServers, addServer, addChannel } = useServerStore.getState();
+const {setServers, addServer, addChannel, setSelectedServer, removeServer } = useServerStore.getState();
 const { setIsLoading } = useLoadingStore.getState();
 const { setMessages, addNewMessage } = useMessageStore.getState();
 const { setRequests, addRequest, removeRequest } = useRequestStore.getState();
 const { setOnlineUsers } = useOnlineUserStore.getState();
+const { setChat } = useChatStore.getState();
 
 socket.on('updated_online_users',(onlineUsers) => {
   setOnlineUsers(onlineUsers);
 });
 
 
-socket.once('user_info',({user, friends, servers, isAuthenticated, requests}) => {
-    setUser(user);
-    setFriends(friends);
-    setServers(servers);
-    setIsAuthenticated(isAuthenticated);
-    setRequests(requests);
-    setIsLoading(false);
+socket.on('connect' , () => {
+  socket.once('user_info',({user, friends, servers, isAuthenticated, requests}) => {
+      setUser(user);
+      setFriends(friends);
+      setServers(servers);
+      setIsAuthenticated(isAuthenticated);
+      setRequests(requests);
+      setIsLoading(false);
+  });
 });
 
 socket.on('auth_error',({isAuthenticated, message}) => {
@@ -82,6 +85,39 @@ socket.on('server_create_error',({message}) => {
     duration: 1000
   });
 });
+
+socket.on('server_deleted',({serverName, serverId}) => {
+  removeServer(serverId);
+  setSelectedServer(null);
+  toast.success(`${serverName} deleted permanently`,{
+    duration: 1000
+  });
+});
+
+socket.on('server_delete_error',({message}) => {
+  toast.error(message,{
+    duration: 1000
+  });
+});
+
+
+socket.on('server_leaved',({serverName, serverId}) => {
+  removeServer(serverId);
+  setSelectedServer(null);
+  setChat(null);
+  toast.success(`${serverName} leaved...`,{
+    duration: 1000
+  });
+});
+
+socket.on('server_leave_error',({message}) => {
+  toast.error(message,{
+    duration: 1000
+  });
+});
+
+
+
 
 socket.on('error_joining_server',({message}) => {
   toast.error(message,{

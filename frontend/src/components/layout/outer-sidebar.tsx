@@ -36,6 +36,7 @@ const OuterSidebar = ({isMobile=false, openSheet = () => {}}:OuterSidebarProps) 
   const { messages } = useMessageStore();
   const { setChat } = useChatStore();
   
+  
   const handleDirectMessage = () => {
     setSelectedServer(null);
     setChat(null);
