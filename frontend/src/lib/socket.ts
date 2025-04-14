@@ -4,8 +4,8 @@ import SocketIoFileClient from 'socket.io-file-client';
 import { useAuthStore, useFriendStore, useLoadingStore, useServerStore, useMessageStore, useRequestStore, useOnlineUserStore, useChatStore } from '@/store/zustand.store';
 import { toast } from 'sonner';
 
-
-export const socket = io("http://localhost:5000",{
+const URL = import.meta.env.PROD ? import.meta.env.VITE_SOCKET_URL : "http://localhost:5000";
+export const socket = io(URL,{
   autoConnect: false
 });
 const uploader = new SocketIoFileClient(socket);
