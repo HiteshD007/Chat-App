@@ -228,5 +228,19 @@ socket.on('logged_out',() => {
     setIsAuthenticated(false);
     setRequests([]);
     setOnlineUsers([]);
+    setChat(null);
+    setSelectedServer(null);
     socket.disconnect();
 })
+
+//MARK: Disconnect
+socket.on('disconnect',() => {
+    setUser(null);
+    setFriends([]);
+    setServers([]);
+    setIsAuthenticated(false);
+    setRequests([]);
+    setOnlineUsers([]);
+    setChat(null);
+    setSelectedServer(null);
+});

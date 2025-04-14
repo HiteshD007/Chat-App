@@ -17,7 +17,7 @@ import UserCard from "../user-card";
 const Layout = () => {
 
   const { chat } = useChatStore();
-
+  
   const [isAddingFriend, setIsAddingFriend] = useState<boolean>(false);
 
   const handleIsAddingFriend = (value:boolean) => {
