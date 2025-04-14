@@ -8,9 +8,6 @@ import { Server } from  'socket.io';
 import socketIoFile from 'socket.io-file';
 
 import authRoute from './routes/auth.routes';
-import serverRoute from './routes/server.routes';
-import inviteRoute from './routes/invite.route';
-import messageRoute from './routes/message.route';
 import { useSocketUser } from './sockets/useSocketUser';
 import path from 'path';
 
@@ -53,9 +50,6 @@ io.on("connection", async(socket) => {
 
 
 app.use("/api/auth",authRoute);
-app.use("/api/server",serverRoute);
-app.use("/api/invite", inviteRoute);
-app.use("/api/message",messageRoute);
 
 
 app.get('*', (req, res) => {
